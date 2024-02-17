@@ -32,10 +32,10 @@ func main() {
 
 	// добавление нового клиента
 	newClient := Client{
-		FIO:      "", // укажите ФИО
-		Login:    "", // укажите логин
-		Birthday: "", // укажите день рождения
-		Email:    "", // укажите почту
+		FIO:      "Щербаков Владлен Александрович", // укажите ФИО
+		Login:    "blackenkeeper",                  // укажите логин
+		Birthday: "19980723",                       // укажите день рождения
+		Email:    "test@test.ru",                   // укажите почту
 	}
 
 	id, err := insertClient(db, newClient)
@@ -53,7 +53,7 @@ func main() {
 	fmt.Println(client)
 
 	// обновление логина клиента
-	newLogin := "" // укажите новый логин
+	newLogin := "deathlaughfear" // укажите новый логин
 	err = updateClientLogin(db, newLogin, id)
 	if err != nil {
 		fmt.Println(err)
@@ -84,19 +84,35 @@ func main() {
 }
 
 func insertClient(db *sql.DB, client Client) (int64, error) {
-	// напишите здесь код для добавления новой записи в таблицу clients
+	insertQuery := "insert into clients (fio, login, birthday, email) values (?, ?, ?, ?)"
+	res, err := db.Exec(insertQuery, client.FIO, client.Login, client.Birthday, client.Email)
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
 
-	return 0, nil // вместо 0 верните идентификатор добавленной записи
+	return res.LastInsertId()
 }
 
 func updateClientLogin(db *sql.DB, login string, id int64) error {
-	// напишите здесь код для обновления поля login в таблице clients у записи с заданным id
-	return nil
+	updateQuery := "update clients set login = :login where id = :id"
+	_, err := db.Exec(updateQuery, sql.Named("login", login), sql.Named("id", id))
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return err
 }
 
 func deleteClient(db *sql.DB, id int64) error {
-	// напишите здесь код для удаления записи из таблицы clients по заданному id
-	return nil
+	deleteQuery := "delete from clients where id = :id"
+	_, err := db.Exec(deleteQuery, sql.Named("id", id))
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return err
 }
 
 func selectClient(db *sql.DB, id int64) (Client, error) {
